@@ -1,0 +1,44 @@
+# Pacotes necessários
+library(readxl)
+library(dplyr)
+library(quantreg)
+
+# Importar a base (ajuste o caminho do arquivo)
+df <- read_excel("C:/Users/")
+
+# Garantir que as variáveis estejam no formato correto
+df <- df %>%
+  mutate(
+    sexo              = as.factor(sexo),
+    raca              = as.factor(raca),
+    alfabetizado      = as.factor(alfabetizado),
+    tem_cnpj          = as.factor(tem_cnpj),
+    carteira_assinada = as.factor(carteira_assinada),
+    nivel_instrucao   = as.factor(nivel_instrucao),
+    informal          = as.factor(informal),
+    sindicalizado     = as.factor(sindicalizado),
+    pessoas_domicilio = V2001,
+    #curso_frequenta   = as.factor(V3002A),   # curso_frequenta
+    #curso_elevado     = as.factor(V3009A),   # curso_elevado
+    bolsa_familia     = as.factor(V5002A)    # bolsa_familia
+  )
+
+
+
+formula_qr <- logrendtrab ~ sexo + idade + raca + alfabetizado + tem_cnpj + 
+  horastrab + nivel_instrucao + informal + sindicalizado + pessoas_domicilio +
+  bolsa_familia 
+
+
+
+# Regressão quantílica (mediana, τ = 0.5)
+rq_median <- rq(formula_qr, tau = 0.5, data = df)
+
+# Resumo dos resultados
+summary(rq_median)
+
+# Estimar em múltiplos quantis
+rq_multi <- rq(formula_qr, tau = c(0.25, 0.5, 0.75), data = df)
+
+# Resumo com intervalos de confiança
+summary(rq_multi, se = "boot")
